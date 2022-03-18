@@ -14,8 +14,16 @@ public class Utilities {
     public static List<ItemDTO> joinLists(List<ItemDTO> whakoomList, List<ItemDTO> publisherList) {
         return whakoomList.stream().map(itemDTO -> {
             ItemDTO item = Utilities.findItemByNumber(publisherList, itemDTO.getNumber());
-            itemDTO.setPages(item.getPages());
-            itemDTO.setPrice(item.getPrice());
+            if (item != null) {
+                itemDTO.setPages(item.getPages());
+                itemDTO.setPrice(item.getPrice());
+                if (itemDTO.getIsbn().equals("000-0000000000") && !item.getIsbn().equals("000-0000000000")) {
+                    itemDTO.setIsbn(item.getIsbn());
+                }
+            } else {
+                itemDTO.setPages(192);
+                itemDTO.setPrice(139.00);
+            }
             return itemDTO;
         }).collect(Collectors.toList());
     }

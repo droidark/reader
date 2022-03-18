@@ -62,11 +62,12 @@ public class WhakoomReader implements Reader {
                 item.setCover(this.saveCover(imageUrl, KEY, PATH, FOLDER, item.getNumber()));
 
                 Elements info = document.select(".wiki .wiki-content .wiki-text p");
-                item.setShortDescription(info.get(0).text().trim());
+                item.setShortDescription(info.size() >= 1 ? info.get(0).text().trim() : "-");
 
                 Elements elems = document.select(".info .content .info-item");
-                item.setDate(elems.get(0).select("p").attr("content"));
-                item.setIsbn(elems.get(1).select("ul li").text());
+
+                item.setDate(elems.size() >= 1 ? elems.get(0).select("p").attr("content") : "0000-00-00");
+                item.setIsbn(elems.size() >= 2 ? elems.get(1).select("ul li").text() : "000-0000000000");
             } catch (Exception e) {
                 e.printStackTrace();
             }
