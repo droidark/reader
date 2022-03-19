@@ -9,11 +9,25 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public interface Reader {
-    List<ItemDTO> getIssues();
+    Integer getTotalPages();
+    List<ItemDTO> getSinglePage(Integer index);
     List<ItemDTO> getDetails(List<ItemDTO> items);
+
+    default List<ItemDTO> getIssues() {
+        int pages = this.getTotalPages();
+        List<ItemDTO> items = new ArrayList<>();
+        for(int i = 1; i <= pages; i++) {
+            items.addAll(this.getSinglePage(i));
+        }
+        return items
+                .stream()
+                .collect(Collectors.toList());
+    }
 
     default String saveCover(String url, String key, String path, String folder, Integer number) throws MalformedURLException {
         String num = number < 10 ? "0" + number : number.toString();

@@ -6,7 +6,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import xyz.krakenkat.parser.dto.ItemDTO;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -37,21 +39,6 @@ public class PaniniReader implements Reader {
     }
 
     @Override
-    public List<ItemDTO> getIssues() {
-        int pages = this.getTotalPages();
-        List<ItemDTO> items = new ArrayList<>();
-
-        for(int i = 1; i <= pages; i++) {
-            items.addAll(this.getSinglePage(i));
-        }
-
-        return items
-                .stream()
-                .sorted(Comparator.comparing(ItemDTO::getNumber))
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public List<ItemDTO> getDetails(List<ItemDTO> items) {
         return items.stream().map(item -> {
             try {
@@ -69,7 +56,7 @@ public class PaniniReader implements Reader {
         }).collect(Collectors.toList());
     }
 
-    private Integer getTotalPages() {
+    public Integer getTotalPages() {
         int pages = 1;
         try {
             Document document = Jsoup.connect(URL + TITLE).get();
@@ -90,7 +77,7 @@ public class PaniniReader implements Reader {
         return pages;
     }
 
-    private List<ItemDTO> getSinglePage(Integer index) {
+    public List<ItemDTO> getSinglePage(Integer index) {
         try {
             String page = "&pg=" + index;
             Document document = Jsoup.connect(URL + TITLE + page).get();

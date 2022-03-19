@@ -5,8 +5,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import xyz.krakenkat.parser.dto.ItemDTO;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class WhakoomReader implements Reader {
@@ -15,7 +18,8 @@ public class WhakoomReader implements Reader {
     private String URL;
     private String TITLE;
     private String PATH;
-    private String FOLDER = "panini-manga-mx";
+    private String FOLDER;
+    private Pattern TOTAL_ISSUES_PATTERN;
 
     public WhakoomReader() {
         ResourceBundle rb = ResourceBundle.getBundle("system");
@@ -24,28 +28,7 @@ public class WhakoomReader implements Reader {
         this.TITLE = rb.getString("whakoom-title");
         this.PATH = rb.getString("images-path");
         this.FOLDER = rb.getString("images-folder");
-    }
-
-    @Override
-    public List<ItemDTO> getIssues() {
-        try {
-            Document doc = Jsoup.connect(URL + TITLE).get();
-            Elements issues = doc.select("ul.v2-cover-list li");
-            return issues
-                    .stream()
-                    .map(issue -> ItemDTO
-                            .builder()
-                            .link(issue.select("a").attr("href"))
-                            .currency("MXN")
-                            .edition(1)
-                            .variant(false)
-                            .build())
-                    .collect(Collectors.toList());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        this.TOTAL_ISSUES_PATTERN = Pattern.compile(rb.getString("whakoom-total-issues-pattern"));
     }
 
     @Override
@@ -72,6 +55,44 @@ public class WhakoomReader implements Reader {
                 e.printStackTrace();
             }
             return item;
-        }).collect(Collectors.toList());
+        })
+                .sorted(Comparator.comparing(ItemDTO::getNumber))
+                .collect(Collectors.toList());
+    }
+
+    public Integer getTotalPages() {
+        try {
+            Document document = Jsoup.connect(URL + TITLE).get();
+            Matcher totalIssues = TOTAL_ISSUES_PATTERN.matcher(document.select("p.edition-issues").text());
+            if (totalIssues.find()) {
+                return (int) Math.ceil(Double.parseDouble(totalIssues.group(0)) / 48);
+            }
+            return 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+
+    public List<ItemDTO> getSinglePage(Integer index) {
+        try {
+            String page = "?page=" + index;
+            Document doc = Jsoup.connect(URL + TITLE + page).get();
+            Elements issues = doc.select("ul.v2-cover-list li");
+            return issues
+                    .stream()
+                    .map(issue -> ItemDTO
+                            .builder()
+                            .link(issue.select("a").attr("href"))
+                            .currency("MXN")
+                            .edition(1)
+                            .variant(false)
+                            .build())
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
