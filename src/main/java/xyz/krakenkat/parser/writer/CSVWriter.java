@@ -35,6 +35,10 @@ public class CSVWriter {
         this.OUTPUT_PATH = rb.getString("csv-output-path");
     }
 
+    public void setKEY(String KEY) {
+        this.KEY = KEY;
+    }
+
     public void writeCSV(List<ItemDTO> itemDTOS) {
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(OUTPUT_PATH + KEY + OUTPUT_FORMAT));

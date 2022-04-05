@@ -1,5 +1,6 @@
 package xyz.krakenkat.parser.reader;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.krakenkat.parser.dto.ItemDTO;
 
 import java.io.File;
@@ -38,12 +39,16 @@ public interface Reader {
             directory.mkdir();
         }
 
-        try (InputStream in = new URL(url).openStream()) {
-            Files.copy(in, Paths.get(imagePath));
-            return "/" + folder + "/" + key + "/" + key + "-" + num + ".jpg";
-        } catch (IOException e) {
-            e.printStackTrace();
+        File originalFile = new File(imagePath);
+        if (!originalFile.exists()) {
+            try (InputStream in = new URL(url).openStream()) {
+                Files.copy(in, Paths.get(imagePath));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("The file already exists");
         }
-        return null;
+        return "/" + folder + "/" + key + "/" + key + "-" + num + ".jpg";
     }
 }

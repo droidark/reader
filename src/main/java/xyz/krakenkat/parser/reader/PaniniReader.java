@@ -1,5 +1,7 @@
 package xyz.krakenkat.parser.reader;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -9,10 +11,13 @@ import xyz.krakenkat.parser.dto.ItemDTO;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Getter
+@Setter
 public class PaniniReader implements Reader {
 
     private String KEY;
@@ -24,6 +29,7 @@ public class PaniniReader implements Reader {
     private Pattern PAGE_NUMBER_PATTERN;
     private Pattern TOTAL_PAGES_PATTERN;
     private Pattern ISBN_PATTERN;
+    private Pattern BOXSET_PATTERN;
 
     public PaniniReader() {
         ResourceBundle rb = ResourceBundle.getBundle("system");
@@ -36,6 +42,7 @@ public class PaniniReader implements Reader {
         this.PAGE_NUMBER_PATTERN = Pattern.compile(rb.getString("panini-page-number-pattern"));
         this.TOTAL_PAGES_PATTERN = Pattern.compile(rb.getString("panini-total-pages-pattern"));
         this.ISBN_PATTERN = Pattern.compile(rb.getString("panini-isbn-pattern"), Pattern.CASE_INSENSITIVE);
+        this.BOXSET_PATTERN = Pattern.compile(rb.getString("panini-boxset-pattern"), Pattern.CASE_INSENSITIVE);
     }
 
     @Override
@@ -86,32 +93,48 @@ public class PaniniReader implements Reader {
                     .get(3)
                     .select(".item");
 
-            return items.stream().map(item -> {
-                        boolean isRegular = item.select("p.little-desc a").text().equals("");
-                        if (isRegular) {
-                            String name = item.select(".description h4 a").text().replace(" - ", " ");
-                            Integer number = 0;
-                            Matcher matcher = NUMBER_PATTERN.matcher(name);
-                            if (matcher.find())
-                                number = Integer.parseInt(matcher.group(0));
-                            return ItemDTO
-                                    .builder()
-                                    .name(name)
-                                    .link(item.select(".description h4 a").attr("href"))
-                                    .number(number)
-                                    .price(Double.parseDouble(item.select("p.price").text().substring(1)))
-                                    .edition(1)
-                                    .variant(false)
-                                    .build();
-                        }
-                        return null;
-                    })
+            return items.stream()
+                    .filter(Predicate.not(this::isBoxSet))
+                    .map(this::buildItem)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private boolean isBoxSet(Element element) {
+        return BOXSET_PATTERN.matcher(element.select("p.little-desc a").text()).find();
+    }
+
+    private ItemDTO buildItem(Element element) {
+        return ItemDTO
+                .builder()
+                .name(this.getName(element))
+                .link(element.select(".description h4 a").attr("href"))
+                .number(this.getNumber(element))
+                .price(Double.parseDouble(element.select("p.price").text().substring(1)))
+                .currency("MXN")
+                .edition(1)
+                .variant(false)
+                .build();
+    }
+
+    private String getName(Element element) {
+        return element.select(".description h4 a").text().replace(" - ", " ");
+    }
+
+    private int getNumber(Element element) {
+        Matcher matcher = NUMBER_PATTERN.matcher(this.getName(element));
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(0));
+        } else {
+            Matcher numberMatcher = NUMBER_PATTERN.matcher(element.select("p.little-desc a").text());
+            if (numberMatcher.find())
+                return Integer.parseInt(numberMatcher.group(0));
+            return 0;
         }
     }
 

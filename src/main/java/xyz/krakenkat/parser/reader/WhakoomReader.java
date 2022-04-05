@@ -64,14 +64,10 @@ public class WhakoomReader implements Reader {
         try {
             Document document = Jsoup.connect(URL + TITLE).get();
             Matcher totalIssues = TOTAL_ISSUES_PATTERN.matcher(document.select("p.edition-issues").text());
-            if (totalIssues.find()) {
-                return (int) Math.ceil(Double.parseDouble(totalIssues.group(0)) / 48);
-            }
-            return 1;
+            return totalIssues.find() ? (int) Math.ceil(Double.parseDouble(totalIssues.group(0)) / 48) : 1;
         } catch (Exception e) {
-            e.printStackTrace();
+            return 1;
         }
-        return 1;
     }
 
     public List<ItemDTO> getSinglePage(Integer index) {

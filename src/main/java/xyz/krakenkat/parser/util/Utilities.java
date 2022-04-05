@@ -20,6 +20,9 @@ public class Utilities {
                 if (itemDTO.getIsbn().equals("000-0000000000") && !item.getIsbn().equals("000-0000000000")) {
                     itemDTO.setIsbn(item.getIsbn());
                 }
+                if ((itemDTO.getShortDescription().equals("-") || itemDTO.getShortDescription().equals("")) && !item.getShortDescription().equals("-")) {
+                    itemDTO.setShortDescription(item.getShortDescription());
+                }
             } else {
                 itemDTO.setPages(192);
                 itemDTO.setPrice(139.00);

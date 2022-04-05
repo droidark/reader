@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 public class ItemDTO {
     private String name;
     private String link;
-    private Integer number;
+    private int number;
     private Integer pages;
-    private Double price;
+    private double price;
     private String cover;
     private String shortDescription;
     private int edition;
