@@ -3,9 +3,10 @@ package xyz.krakenkat.parser.util;
 import xyz.krakenkat.parser.dto.ItemDTO;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Utilities {
+    private Utilities() {
+    }
 
     public static ItemDTO findItemByNumber(List<ItemDTO> items, Integer number) {
         return items.stream().filter(item -> item.getNumber() == number).findFirst().orElse(null);
@@ -17,17 +18,17 @@ public class Utilities {
             if (item != null) {
                 itemDTO.setPages(item.getPages());
                 itemDTO.setPrice(item.getPrice());
-                if (itemDTO.getIsbn().equals("000-0000000000") && !item.getIsbn().equals("000-0000000000")) {
+                if (itemDTO.getIsbn().equals(ReaderConstants.DEFAULT_ISBN) && !item.getIsbn().equals(ReaderConstants.DEFAULT_ISBN)) {
                     itemDTO.setIsbn(item.getIsbn());
                 }
                 if ((itemDTO.getShortDescription().equals("-") || itemDTO.getShortDescription().equals("")) && !item.getShortDescription().equals("-")) {
                     itemDTO.setShortDescription(item.getShortDescription());
                 }
             } else {
-                itemDTO.setPages(192);
-                itemDTO.setPrice(139.00);
+                itemDTO.setPages(ReaderConstants.DEFAULT_PAGES);
+                itemDTO.setPrice(ReaderConstants.DEFAULT_PRICE);
             }
             return itemDTO;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 }

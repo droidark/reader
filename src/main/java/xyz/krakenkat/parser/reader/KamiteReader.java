@@ -1,35 +1,31 @@
 package xyz.krakenkat.parser.reader;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import xyz.krakenkat.parser.dto.ItemDTO;
+import xyz.krakenkat.parser.util.ReaderConstants;
 
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
+@Slf4j
 public class KamiteReader implements Reader {
 
-    private String KEY;
-    private String URL;
-    private String TITLE;
-    private Pattern NUMBER_PATTERN;
-    private Pattern PAGE_NUMBER_PATTERN;
-    private Pattern BOXSET_PATTERN;
+    private static final String PRODUCT_NAME_LOCATION = ".right-block .product-meta h5.name a.product-name";
+    private static final String TITLE_ATTR = "title";
+    private final Pattern numberPattern = Pattern.compile(ReaderConstants.KAMITE_NUMBER_PATTERN);
+    private final Pattern pageNumberPattern = Pattern.compile(ReaderConstants.KAMITE_PAGE_NUMBER_PATTERN);
+    private final Pattern boxsetPattern = Pattern.compile(ReaderConstants.KAMITE_BOXSET_PATTERN, Pattern.CASE_INSENSITIVE);
+    private String title = ResourceBundle.getBundle("application").getString("reader.title.kamite");
 
-    public KamiteReader() {
-        ResourceBundle rb = ResourceBundle.getBundle("system");
-        this.KEY = rb.getString("key");
-        this.URL = rb.getString("kamite-url");
-        this.TITLE = rb.getString("kamite-title");
-        this.NUMBER_PATTERN = Pattern.compile(rb.getString("kamite-number-pattern"));
-        this.PAGE_NUMBER_PATTERN = Pattern.compile(rb.getString("kamite-page-number-pattern"));
-        this.BOXSET_PATTERN = Pattern.compile(rb.getString("kamite-boxset-pattern"), Pattern.CASE_INSENSITIVE);
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     @Override
@@ -39,22 +35,24 @@ public class KamiteReader implements Reader {
 
     @Override
     public List<ItemDTO> getSinglePage(Integer index) {
+        log.info(String.format("Reading page %d", index));
         try {
-            Document document = Jsoup.connect(URL + TITLE).get();
+            Document document = Jsoup.connect(ReaderConstants.KAMITE_BASE_URL + title).get();
             Elements elements = document.select(".product_list .product-container");
             return elements
                     .stream()
                     .filter(Predicate.not(this::isBoxSet))
                     .map(this::buildItem)
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return List.of();
     }
 
     @Override
     public List<ItemDTO> getDetails(List<ItemDTO> items) {
+        log.info("Getting item details from Kamite");
         return items.stream().map(item -> {
             try {
                 Document document = Jsoup.connect(item.getLink()).get();
@@ -63,37 +61,31 @@ public class KamiteReader implements Reader {
                 e.printStackTrace();
             }
             return item;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     private boolean isBoxSet(Element element) {
-        String title = element
-                .select(".right-block .product-meta h5.name a.product-name")
-                .attr("title");
-        Matcher matcher = BOXSET_PATTERN.matcher(title);
-        return matcher.find();
+        return boxsetPattern.matcher(element.select(PRODUCT_NAME_LOCATION).attr(TITLE_ATTR)).find();
     }
 
     private ItemDTO buildItem(Element element) {
         return ItemDTO
                 .builder()
-                .link(element.select(".right-block .product-meta h5.name a.product-name").attr("href"))
-                .name(element.select(".right-block .product-meta h5.name a.product-name").attr("title"))
+                .link(element.select(PRODUCT_NAME_LOCATION).attr("href"))
+                .name(element.select(PRODUCT_NAME_LOCATION).attr(TITLE_ATTR))
                 .price(this.getPrice(element))
                 .number(this.getNumber(element))
                 .pages(this.getPageNumber(element))
-                .isbn("000-0000000000")
-                .currency("MXN")
-                .edition(1)
+                .isbn(ReaderConstants.DEFAULT_ISBN)
+                .currency(ReaderConstants.MXN_CURRENCY)
+                .edition(ReaderConstants.DEFAULT_EDITION)
+                .variant(false)
                 .build();
     }
 
     private int getNumber(Element element) {
-        String title = element.select(".right-block .product-meta h5.name a.product-name").attr("title");
-        Matcher matcher = NUMBER_PATTERN.matcher(title);
-        if (matcher.find())
-            return Integer.parseInt(matcher.group(0).trim());
-        return 0;
+        Matcher matcher = numberPattern.matcher(element.select(PRODUCT_NAME_LOCATION).attr(TITLE_ATTR));
+        return matcher.find() ? Integer.parseInt(matcher.group(0).trim()) : 1;
 
     }
 
@@ -105,10 +97,7 @@ public class KamiteReader implements Reader {
     }
 
     private int getPageNumber(Element element) {
-        String text = element.select(".right-block .product-meta .product-desc").text();
-        Matcher matcher = PAGE_NUMBER_PATTERN.matcher(text);
-        if (matcher.find())
-            return Integer.parseInt(matcher.group(0).trim());
-        return 192;
+        Matcher matcher = pageNumberPattern.matcher(element.select(".right-block .product-meta .product-desc").text());
+        return matcher.find() ? Integer.parseInt(matcher.group(0).trim()) : ReaderConstants.DEFAULT_PAGES;
     }
 }

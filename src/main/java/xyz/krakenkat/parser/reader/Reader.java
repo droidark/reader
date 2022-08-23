@@ -1,18 +1,16 @@
 package xyz.krakenkat.parser.reader;
 
-import lombok.extern.slf4j.Slf4j;
 import xyz.krakenkat.parser.dto.ItemDTO;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.ResourceBundle;
 
 public interface Reader {
     Integer getTotalPages();
@@ -25,19 +23,18 @@ public interface Reader {
         for(int i = 1; i <= pages; i++) {
             items.addAll(this.getSinglePage(i));
         }
-        return items
-                .stream()
-                .collect(Collectors.toList());
+        return items.stream().toList();
     }
 
-    default String saveCover(String url, String key, String path, String folder, Integer number) throws MalformedURLException {
+    default String saveCover(String url, String key, Integer number) {
+        String path = ResourceBundle.getBundle("application").getString("reader.images.path");
+        String folder = ResourceBundle.getBundle("application").getString("reader.images.folder");
         String num = number < 10 ? "0" + number : number.toString();
-        String imagePath = path + key + "\\" + key  + "-" + num + ".jpg";
+        String imagePath = path + key + File.separator + key  + "-" + num + ".jpg";
 
         File directory = new File(path + key);
-        if (!directory.exists()) {
+        if (!directory.exists())
             directory.mkdir();
-        }
 
         File originalFile = new File(imagePath);
         if (!originalFile.exists()) {
@@ -46,8 +43,6 @@ public interface Reader {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
-            System.out.println("The file already exists");
         }
         return "/" + folder + "/" + key + "/" + key + "-" + num + ".jpg";
     }
