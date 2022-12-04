@@ -1,5 +1,6 @@
 package xyz.krakenkat.reader.lector;
 
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -9,26 +10,29 @@ import xyz.krakenkat.reader.dto.ItemDTO;
 import xyz.krakenkat.reader.util.ReaderConstants;
 
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PaniniLectorV2 implements Lector {
 
-    private String title = ResourceBundle.getBundle("application").getString("reader.title.panini");
-    private final Pattern numberPattern = Pattern.compile(ReaderConstants.PANINI_V2_NUMBER_PATTERN);
+    private String titleId;
+    private String key;
+    private String url;
+    private String path;
+    private String folder;
+    private boolean download = false;
     private static final String LINK_LOCATION = ".product-item-details strong.product-item-name a.product-item-link";
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
     @Override
     public Integer getTotalPages() {
-        log.info(String.format("Getting total pages from %s%s", ReaderConstants.PANINI_BASE_URL, title));
         try {
-            Document document = Jsoup.connect(ReaderConstants.PANINI_BASE_URL + title).get();
+            log.info(String.format("Getting total pages from %s%s", ReaderConstants.PANINI_BASE_URL, url));
+            Document document = Jsoup.connect(ReaderConstants.PANINI_BASE_URL + url).get();
             return document.select("#toolbar-amount").get(0).select(".toolbar-number").size() == 1
                     ? 1
                     : (int) Math.ceil(Double.parseDouble(document.select("#toolbar-amount").get(0).select(".toolbar-number").get(2).text()) / 12);
@@ -40,15 +44,16 @@ public class PaniniLectorV2 implements Lector {
 
     @Override
     public List<ItemDTO> getSinglePage(Integer index) {
-        log.info(String.format("Reading page %d", index));
         try {
-            String page = ReaderConstants.PANINI_BASE_URL + title + "&p=" + index;
+            log.info(String.format("Reading page %d", index));
+            String page = ReaderConstants.PANINI_BASE_URL + url + "&p=" + index;
             Document document = Jsoup.connect(page).get();
             Elements issues = document.select("ol.product-items li.product-item [id^=product-item-info_]");
             return issues
                     .stream()
                     .map(issue -> ItemDTO
                             .builder()
+                            .titleId(titleId)
                             .link(issue.select(LINK_LOCATION).attr("href"))
                             .name(this.getName(issue))
                             .number(this.getNumber(issue))
@@ -66,25 +71,40 @@ public class PaniniLectorV2 implements Lector {
     }
 
     @Override
-    public List<ItemDTO> getDetails(List<ItemDTO> items) {
+    public List<ItemDTO> getDetails() {
         log.info("Getting item details from Panini");
-        return items
+        return getIssues()
                 .stream()
-                .map(item -> {
-                    try {
-                        Document document = Jsoup.connect(item.getLink()).get();
-                        item.setShortDescription(this.getDescription(document));
-                        item.setPages(this.getNumberPages(document));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return item;
-                }).toList();
+                .map(this::buildDetails)
+                .toList();
+    }
+
+    @Override
+    public List<ItemDTO> getDetails(List<ItemDTO> databaseList) {
+        log.info("Getting item details from Panini");
+        return getIssues()
+                .stream()
+                .filter(item -> !databaseList.contains(item))
+                .map(this::buildDetails)
+                .toList();
+    }
+
+    private ItemDTO buildDetails(ItemDTO item) {
+        log.info(String.format("Reading %s", item.getName()));
+        try {
+            Document document = Jsoup.connect(item.getLink()).get();
+            item.setShortDescription(this.getDescription(document));
+            item.setPages(this.getNumberPages(document));
+            item.setCover(getCover());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return item;
     }
 
     private int getNumber(Element element) {
         String text = element.select(LINK_LOCATION).text();
-        Matcher matcher = numberPattern.matcher(text);
+        Matcher matcher = ReaderConstants.PANINI_V2_NUMBER_PATTERN.matcher(text);
         return matcher.find() ? Integer.parseInt(matcher.group(0).trim()) : 1;
     }
 

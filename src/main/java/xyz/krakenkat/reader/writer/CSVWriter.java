@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import xyz.krakenkat.reader.dto.ItemDTO;
+import xyz.krakenkat.reader.util.ReaderConstants;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -19,34 +20,23 @@ public class CSVWriter {
 
     private String key;
     private String outputPath;
-    private static final String OUTPUT_FORMAT = ".csv";
-    private static final String DELIMITER = "|";
-    private static final String[] HEADERS = {"NAME",
-            "KEY",
-            "NUMBER",
-            "COVER",
-            "PAGES",
-            "PRINTED_PRICE",
-            "CURRENCY",
-            "RELEASE_DATE",
-            "SHORT_REVIEW",
-            "ISBN10",
-            "EDITION",
-            "VARIANT"};
+
 
     public CSVWriter() {
         this.key = ResourceBundle.getBundle("application").getString("reader.key");
         this.outputPath = ResourceBundle.getBundle("application").getString("reader.csv.output-file");
     }
 
+    public void setKey(String key) { this.key = key; }
+
     public void writeCSV(List<ItemDTO> itemDTOS) {
-        log.info(String.format("Starting to build CSV %s%s", key, OUTPUT_FORMAT));
-        try (final BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputPath + key + OUTPUT_FORMAT))) {
+        log.info(String.format("Starting to build CSV %s%s", key, ReaderConstants.OUTPUT_FORMAT));
+        try (final BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputPath + key + ReaderConstants.OUTPUT_FORMAT))) {
             CSVFormat csvFormat = CSVFormat
                     .Builder
                     .create()
-                    .setHeader(HEADERS)
-                    .setDelimiter(DELIMITER)
+                    .setHeader(ReaderConstants.HEADERS)
+                    .setDelimiter(ReaderConstants.DELIMITER)
                     .build();
 
             try (final CSVPrinter csvPrinter = new CSVPrinter(writer, csvFormat)) {
@@ -64,11 +54,11 @@ public class CSVWriter {
                             itemDTO.getShortDescription(),
                             itemDTO.getIsbn(),
                             itemDTO.getEdition(),
-                            itemDTO.isVariant()
+                            itemDTO.getVariant()
                     );
                     csvPrinter.flush();
                 }
-                log.info(String.format("The CSV file is located in: %s%s%s", outputPath, key, OUTPUT_FORMAT));
+                log.info(String.format("The CSV file is located in: %s%s%s", outputPath, key, ReaderConstants.OUTPUT_FORMAT));
             }
         } catch (IOException e) {
             log.error(String.format("There was an error at the moment to build the CSV file %s", e.getMessage()));

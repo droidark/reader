@@ -1,25 +1,40 @@
 package xyz.krakenkat.reader.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+import java.util.Objects;
+
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class ItemDTO {
+    private String titleId;
     private String name;
     private String link;
-    private int number;
+    private Integer number;
     private Integer pages;
-    private double price;
+    private Double price;
     private String cover;
     private String shortDescription;
-    private int edition;
-    private boolean variant;
+    private Integer edition;
+    private Boolean variant;
     private String date;
     private String isbn;
     private String currency;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ItemDTO itemDTO = (ItemDTO) o;
+        return Objects.equals(titleId, itemDTO.titleId) && Objects.equals(number, itemDTO.number) && Objects.equals(variant, itemDTO.variant);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(titleId, number, variant);
+    }
 }

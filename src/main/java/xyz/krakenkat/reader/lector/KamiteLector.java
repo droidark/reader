@@ -1,5 +1,6 @@
 package xyz.krakenkat.reader.lector;
 
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -9,35 +10,34 @@ import xyz.krakenkat.reader.dto.ItemDTO;
 import xyz.krakenkat.reader.util.ReaderConstants;
 
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class KamiteLector implements Lector {
 
+    private String titleId;
+    private String key;
+    private String url;
+    private String path;
+    private String folder;
+    private boolean download = false;
     private static final String PRODUCT_NAME_LOCATION = ".right-block .product-meta h5.name a.product-name";
     private static final String TITLE_ATTR = "title";
-    private final Pattern numberPattern = Pattern.compile(ReaderConstants.KAMITE_NUMBER_PATTERN);
-    private final Pattern pageNumberPattern = Pattern.compile(ReaderConstants.KAMITE_PAGE_NUMBER_PATTERN);
-    private final Pattern boxsetPattern = Pattern.compile(ReaderConstants.KAMITE_BOXSET_PATTERN, Pattern.CASE_INSENSITIVE);
-    private String title = ResourceBundle.getBundle("application").getString("reader.title.kamite");
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
     @Override
-    public Integer getTotalPages() {
-        return 1;
-    }
+    public Integer getTotalPages() { return 1; }
 
     @Override
     public List<ItemDTO> getSinglePage(Integer index) {
-        log.info(String.format("Reading page %d", index));
         try {
-            Document document = Jsoup.connect(ReaderConstants.KAMITE_BASE_URL + title).get();
+            log.info(String.format("Reading page %d", index));
+            Document document = Jsoup.connect(ReaderConstants.KAMITE_BASE_URL + url).get();
             Elements elements = document.select(".product_list .product-container");
             return elements
                     .stream()
@@ -51,21 +51,37 @@ public class KamiteLector implements Lector {
     }
 
     @Override
-    public List<ItemDTO> getDetails(List<ItemDTO> items) {
+    public List<ItemDTO> getDetails() {
         log.info("Getting item details from Kamite");
-        return items.stream().map(item -> {
-            try {
-                Document document = Jsoup.connect(item.getLink()).get();
-                item.setShortDescription(document.select("#tab2 .rte p").get(0).text());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return item;
-        }).toList();
+        return getIssues()
+                .stream()
+                .map(this::buildDetails)
+                .toList();
+    }
+
+    @Override
+    public List<ItemDTO> getDetails(List<ItemDTO> databaseList) {
+        log.info("Getting item details from Kamite");
+        return getIssues()
+                .stream()
+                .filter(item -> !databaseList.contains(item))
+                .map(this::buildDetails)
+                .toList();
+    }
+
+    private ItemDTO buildDetails(ItemDTO item) {
+        try {
+            Document document = Jsoup.connect(item.getLink()).get();
+            item.setCover(getCover());
+            item.setShortDescription(document.select("#tab2 .rte p").get(0).text());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return item;
     }
 
     private boolean isBoxSet(Element element) {
-        return boxsetPattern.matcher(element.select(PRODUCT_NAME_LOCATION).attr(TITLE_ATTR)).find();
+        return ReaderConstants.KAMITE_BOXSET_PATTERN.matcher(element.select(PRODUCT_NAME_LOCATION).attr(TITLE_ATTR)).find();
     }
 
     private ItemDTO buildItem(Element element) {
@@ -84,20 +100,20 @@ public class KamiteLector implements Lector {
     }
 
     private int getNumber(Element element) {
-        Matcher matcher = numberPattern.matcher(element.select(PRODUCT_NAME_LOCATION).attr(TITLE_ATTR));
+        Matcher matcher = ReaderConstants.KAMITE_NUMBER_PATTERN.matcher(element.select(PRODUCT_NAME_LOCATION).attr(TITLE_ATTR));
         return matcher.find() ? Integer.parseInt(matcher.group(0).trim()) : 1;
 
     }
 
     private double getPrice(Element element) {
-        return Double.parseDouble(element.select(".right-block .product-meta .content_price .product-price")
+        return Double.parseDouble(element.select(".right-block .product-meta .content_price .price.product-price")
                 .text()
                 .replace("$", "")
                 .trim());
     }
 
     private int getPageNumber(Element element) {
-        Matcher matcher = pageNumberPattern.matcher(element.select(".right-block .product-meta .product-desc").text());
+        Matcher matcher = ReaderConstants.KAMITE_PAGE_NUMBER_PATTERN.matcher(element.select(".right-block .product-meta .product-desc").text());
         return matcher.find() ? Integer.parseInt(matcher.group(0).trim()) : ReaderConstants.DEFAULT_PAGES;
     }
 }
