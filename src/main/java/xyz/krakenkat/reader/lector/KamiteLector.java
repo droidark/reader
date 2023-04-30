@@ -95,7 +95,7 @@ public class KamiteLector implements Lector {
                 .isbn(ReaderConstants.DEFAULT_ISBN)
                 .currency(ReaderConstants.MXN_CURRENCY)
                 .edition(ReaderConstants.DEFAULT_EDITION)
-                .variant(false)
+                .variant(Boolean.FALSE)
                 .build();
     }
 

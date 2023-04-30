@@ -26,18 +26,22 @@ public class ReaderConstants {
     public static final Pattern PANINI_ISBN_PATTERN = Pattern.compile("isbn", Pattern.CASE_INSENSITIVE);
     public static final Pattern PANINI_BOXSET_PATTERN = Pattern.compile("box[\\s]?set|serie[\\s]completa|paquete", Pattern.CASE_INSENSITIVE);
 
+    // PANINI V2
+    public static final Pattern PANINI_V2_NUMBER_PATTERN = Pattern.compile("^*?[0-9]{1,3}$");
+
     // KAMITE
     public static final String KAMITE_BASE_URL = "https://kamite.com.mx";
     public static final Pattern KAMITE_NUMBER_PATTERN = Pattern.compile("\\d{1,3}$");
     public static final Pattern KAMITE_PAGE_NUMBER_PATTERN= Pattern.compile("\\d{3}");
     public static final Pattern KAMITE_BOXSET_PATTERN = Pattern.compile("^PAQUETE", Pattern.CASE_INSENSITIVE);
 
+    // KAMITE V2
+    public static final Pattern KAMITE_V2_PRICE_PATTERN = Pattern.compile("\\d{1,3}\\.\\d{2}");
+
     // WHAKOOM
     public static final String WHAKOOM_BASE_URL = "https://whakoom.com";
     public static final Pattern WHAKOOM_TOTAL_ISSUES_PATTERN = Pattern.compile("^\\d{1,4}");
-
-    // PANINI V2
-    public static final Pattern PANINI_V2_NUMBER_PATTERN = Pattern.compile("^*?[0-9]{1,3}$");
+    public static final Pattern WHAKOOM_NUMBER_PATTERN = Pattern.compile("\\d{1,3}$");
 
     // VIZ MEDIA
     public static final String VIZ_BASE_URL = "https://www.viz.com";
@@ -46,6 +50,15 @@ public class ReaderConstants {
     public static final Pattern VIZ_ISBN_PATTERN = Pattern.compile("\\d{3}-\\d{1}-\\d{4}-\\d{4}-\\d{1}");
     public static final Pattern VIZ_PRICE_PATTERN = Pattern.compile("\\d{1,2}\\.\\d{2}");
     public static final Pattern VIZ_PAGES_PATTERN = Pattern.compile("\\d{2,4}");
+
+    // DISTRITO MANGA
+    public static final String DISTRITO_MANGA_BASE_URL = "https://www.penguinlibros.com";
+    public static final Pattern DISTRITO_MANGA_NUMBER_PATTERN = Pattern.compile("\\d{1,3}$");
+
+    // MANGALINE
+    public static final String MANGALINE_BASE_URL = "https://mangaline.com.mx";
+    public static final Pattern MANGALINE_NUMBER_PATTERN = Pattern.compile("\\d{1,3}$");
+    public static final Pattern MANGALINE_PRICE_PATTERN = Pattern.compile("\\d{1,3}\\.\\d{2}");
 
     // WRITER
     public static final String OUTPUT_FORMAT = ".csv";

@@ -115,7 +115,7 @@ public class PaniniLector implements Lector {
                 .price(Double.parseDouble(element.select("p.price").text().substring(1)))
                 .currency(ReaderConstants.MXN_CURRENCY)
                 .edition(1)
-                .variant(false)
+                .variant(Boolean.FALSE)
                 .build();
     }
 

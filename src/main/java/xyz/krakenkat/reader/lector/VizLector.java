@@ -46,7 +46,7 @@ public class VizLector implements Lector {
                             .number(this.getNumber(issue))
                             .currency(ReaderConstants.USD_CURRENCY)
                             .edition(ReaderConstants.DEFAULT_EDITION)
-                            .variant(false)
+                            .variant(Boolean.FALSE)
                             .build())
                     .toList();
         } catch (Exception e) {

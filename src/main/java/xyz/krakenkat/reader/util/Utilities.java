@@ -24,6 +24,9 @@ public class Utilities {
                 if ((itemDTO.getShortDescription().equals("-") || itemDTO.getShortDescription().equals("")) && !item.getShortDescription().equals("-")) {
                     itemDTO.setShortDescription(item.getShortDescription());
                 }
+                if (itemDTO.getDate().equals("") && (!item.getDate().equals("") && item.getDate() != null)) {
+                    itemDTO.setDate(item.getDate());
+                }
             } else {
                 itemDTO.setPages(ReaderConstants.DEFAULT_PAGES);
                 itemDTO.setPrice(ReaderConstants.DEFAULT_PRICE);

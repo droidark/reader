@@ -61,7 +61,7 @@ public class PaniniLectorV2 implements Lector {
                             .currency(ReaderConstants.MXN_CURRENCY)
                             .edition(ReaderConstants.DEFAULT_EDITION)
                             .isbn(ReaderConstants.DEFAULT_ISBN)
-                            .variant(false)
+                            .variant(Boolean.FALSE)
                             .build())
                     .toList();
         } catch (Exception e) {

@@ -65,7 +65,7 @@ public class WhakoomLector implements Lector {
             log.info(String.format("Reading %s, page %d", key, index));
             String page = "?page=" + index;
             Document doc = Jsoup.connect(ReaderConstants.WHAKOOM_BASE_URL + url + page).get();
-            Elements issues = doc.select("ul.v2-cover-list li");
+            Elements issues = doc.select("ul.v2-cover-list.auto-rows.same-edition li:not(.not-published)");
             return issues
                     .stream()
                     .map(issue -> ItemDTO
@@ -73,10 +73,10 @@ public class WhakoomLector implements Lector {
                             .titleId(titleId)
                             .link(issue.select("a").attr("href"))
                             .name(issue.select("a").attr("title"))
-                            .number(Integer.parseInt(issue.select(".issue-number").text().substring(1)))
-                            .currency("MXN")
+                            .number(this.getNumber(issue))
+                            .currency(ReaderConstants.MXN_CURRENCY)
                             .edition(1)
-                            .variant(false)
+                            .variant(Boolean.FALSE)
                             .build())
                     .toList();
 
@@ -92,7 +92,6 @@ public class WhakoomLector implements Lector {
             Document document = Jsoup.connect(ReaderConstants.WHAKOOM_BASE_URL + item.getLink()).get();
             Element element = document.select(".b-info").get(0);
 
-            item.setNumber(this.getNumber(element));
             item.setName(this.getName(element, item.getNumber()));
             item.setShortDescription(this.getShortDescription(document));
 
@@ -114,8 +113,10 @@ public class WhakoomLector implements Lector {
         return item;
     }
 
-    private int getNumber(Element element) {
-        return Integer.parseInt(element.select("h1 strong").text().substring(1));
+    private Integer getNumber(Element element) {
+        String text = element.select(".issue-number").text();
+        Matcher matcher = ReaderConstants.WHAKOOM_NUMBER_PATTERN.matcher(text);
+        return matcher.find() ? Integer.valueOf(matcher.group(0).trim()) : 1;
     }
 
     private String getName(Element element, int number) {
