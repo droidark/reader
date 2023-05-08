@@ -37,6 +37,7 @@ public class ReaderConstants {
 
     // KAMITE V2
     public static final Pattern KAMITE_V2_PRICE_PATTERN = Pattern.compile("\\d{1,3}\\.\\d{2}");
+    public static final Pattern KAMITE_V2_PAGE_PATTERN = Pattern.compile("\\d{1,3}");
 
     // WHAKOOM
     public static final String WHAKOOM_BASE_URL = "https://whakoom.com";

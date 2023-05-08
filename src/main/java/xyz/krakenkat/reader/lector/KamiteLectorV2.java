@@ -31,6 +31,14 @@ public class KamiteLectorV2 implements Lector {
 
     @Override
     public Integer getTotalPages() {
+        try {
+            log.info(String.format("Getting total pages from %s%s", ReaderConstants.KAMITE_BASE_URL, url));
+            Document document = Jsoup.connect(ReaderConstants.KAMITE_BASE_URL + url).get();
+            Matcher matcher = ReaderConstants.KAMITE_V2_PAGE_PATTERN.matcher(document.select(".total-products").text());
+            return matcher.find() ? (int) Math.ceil(Double.parseDouble(matcher.group(0)) / 20) : 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return 1;
     }
 
@@ -38,7 +46,7 @@ public class KamiteLectorV2 implements Lector {
     public List<ItemDTO> getSinglePage(Integer index) {
         try {
             log.info(String.format("Reading page %d", index));
-            Document document = Jsoup.connect(ReaderConstants.KAMITE_BASE_URL + url).get();
+            Document document = Jsoup.connect(ReaderConstants.KAMITE_BASE_URL + url + "&page=" + index).get();
             Elements elements = document.select("#js-product-list .product_content .item-product article");
             return elements
                     .stream()
@@ -58,6 +66,7 @@ public class KamiteLectorV2 implements Lector {
         return getIssues()
                 .stream()
                 .map(this::buildDetails)
+                .sorted(Comparator.comparing(ItemDTO::getNumber))
                 .toList();
     }
 
@@ -68,6 +77,7 @@ public class KamiteLectorV2 implements Lector {
                 .stream()
                 .filter(item -> !databaseList.contains(item))
                 .map(this::buildDetails)
+                .sorted(Comparator.comparing(ItemDTO::getNumber))
                 .toList();
     }
 
