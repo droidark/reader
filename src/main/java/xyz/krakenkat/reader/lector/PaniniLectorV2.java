@@ -71,25 +71,7 @@ public class PaniniLectorV2 implements Lector {
     }
 
     @Override
-    public List<ItemDTO> getDetails() {
-        log.info("Getting item details from Panini");
-        return getIssues()
-                .stream()
-                .map(this::buildDetails)
-                .toList();
-    }
-
-    @Override
-    public List<ItemDTO> getDetails(List<ItemDTO> databaseList) {
-        log.info("Getting item details from Panini");
-        return getIssues()
-                .stream()
-                .filter(item -> !databaseList.contains(item))
-                .map(this::buildDetails)
-                .toList();
-    }
-
-    private ItemDTO buildDetails(ItemDTO item) {
+    public ItemDTO buildDetails(ItemDTO item) {
         log.info(String.format("Reading %s", item.getName()));
         try {
             Document document = Jsoup.connect(item.getLink()).get();

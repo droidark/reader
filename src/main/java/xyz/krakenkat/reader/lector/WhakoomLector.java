@@ -9,7 +9,6 @@ import org.jsoup.select.Elements;
 import xyz.krakenkat.reader.dto.ItemDTO;
 import xyz.krakenkat.reader.util.ReaderConstants;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 
@@ -27,27 +26,6 @@ public class WhakoomLector implements Lector {
     private String path;
     private String folder;
     private boolean download = false;
-
-    @Override
-    public List<ItemDTO> getDetails() {
-        log.info("Getting item details from Whakoom");
-        return getIssues()
-                .stream()
-                .map(this::buildDetails)
-                .sorted(Comparator.comparing(ItemDTO::getNumber))
-                .toList();
-    }
-
-    @Override
-    public List<ItemDTO> getDetails(List<ItemDTO> databaseList) {
-        log.info("Getting item details from Whakoom");
-        return getIssues()
-                .stream()
-                .filter(item -> !databaseList.contains(item))
-                .map(this::buildDetails)
-                .sorted(Comparator.comparing(ItemDTO::getNumber))
-                .toList();
-    }
 
     public Integer getTotalPages() {
         try {
@@ -86,7 +64,8 @@ public class WhakoomLector implements Lector {
         }
     }
 
-    private ItemDTO buildDetails(ItemDTO item) {
+    @Override
+    public ItemDTO buildDetails(ItemDTO item) {
         log.info(String.format("Reading %s", item.getName()));
         try {
             Document document = Jsoup.connect(ReaderConstants.WHAKOOM_BASE_URL + item.getLink()).get();

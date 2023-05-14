@@ -49,25 +49,6 @@ public class DistritoMangaLector implements Lector {
         return List.of();
     }
 
-    @Override
-    public List<ItemDTO> getDetails() {
-        log.info("Getting item details from Distrito Manga");
-        return getIssues()
-                .stream()
-                .map(this::buildDetails)
-                .toList();
-    }
-
-    @Override
-    public List<ItemDTO> getDetails(List<ItemDTO> databaseList) {
-        log.info("Getting item details from Distrito Manga");
-        return getIssues()
-                .stream()
-                .filter(item -> !databaseList.contains(item))
-                .map(this::buildDetails)
-                .toList();
-    }
-
     private ItemDTO buildItem(Element element) {
         return ItemDTO
                 .builder()
@@ -83,7 +64,8 @@ public class DistritoMangaLector implements Lector {
                 .build();
     }
 
-    private ItemDTO buildDetails(ItemDTO itemDTO) {
+    @Override
+    public ItemDTO buildDetails(ItemDTO itemDTO) {
         log.info(String.format("Reading %s", itemDTO.getName()));
         try {
             Document document = Jsoup.connect(itemDTO.getLink())

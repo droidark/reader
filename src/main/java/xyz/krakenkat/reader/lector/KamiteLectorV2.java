@@ -61,24 +61,17 @@ public class KamiteLectorV2 implements Lector {
     }
 
     @Override
-    public List<ItemDTO> getDetails() {
-        log.info("Getting item details from Kamite");
-        return getIssues()
-                .stream()
-                .map(this::buildDetails)
-                .sorted(Comparator.comparing(ItemDTO::getNumber))
-                .toList();
-    }
-
-    @Override
-    public List<ItemDTO> getDetails(List<ItemDTO> databaseList) {
-        log.info("Getting item details from Kamite Manga");
-        return getIssues()
-                .stream()
-                .filter(item -> !databaseList.contains(item))
-                .map(this::buildDetails)
-                .sorted(Comparator.comparing(ItemDTO::getNumber))
-                .toList();
+    public ItemDTO buildDetails(ItemDTO itemDTO) {
+        log.info(String.format("Reading %s", itemDTO.getName()));
+        try {
+            Document document = Jsoup.connect(itemDTO.getLink())
+                    .userAgent(ReaderConstants.USER_AGENT)
+                    .get();
+            itemDTO.setShortDescription(getDescription(document));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return itemDTO;
     }
 
     private ItemDTO buildItem(Element element) {
@@ -96,19 +89,6 @@ public class KamiteLectorV2 implements Lector {
                 .edition(ReaderConstants.DEFAULT_EDITION)
                 .variant(Boolean.FALSE)
                 .build();
-    }
-
-    private ItemDTO buildDetails(ItemDTO itemDTO) {
-        log.info(String.format("Reading %s", itemDTO.getName()));
-        try {
-            Document document = Jsoup.connect(itemDTO.getLink())
-                    .userAgent(ReaderConstants.USER_AGENT)
-                    .get();
-            itemDTO.setShortDescription(getDescription(document));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return itemDTO;
     }
 
     private boolean isBoxSet(Element element) {

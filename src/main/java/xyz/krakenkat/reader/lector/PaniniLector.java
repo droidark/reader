@@ -27,23 +27,6 @@ public class PaniniLector implements Lector {
     private String folder;
     private boolean download = false;
 
-    @Override
-    public List<ItemDTO> getDetails() {
-        return getIssues()
-                .stream()
-                .map(this::buildDetails)
-                .toList();
-    }
-
-    @Override
-    public List<ItemDTO> getDetails(List<ItemDTO> databaseList) {
-        return getIssues()
-                .stream()
-                .filter(item -> !databaseList.contains(item))
-                .map(this::buildDetails)
-                .toList();
-    }
-
     public Integer getTotalPages() {
         int pages = 1;
         try {
@@ -86,7 +69,8 @@ public class PaniniLector implements Lector {
         }
     }
 
-    private ItemDTO buildDetails(ItemDTO item) {
+    @Override
+    public ItemDTO buildDetails(ItemDTO item) {
         try {
             Document document = Jsoup.connect(item.getLink()).get();
             Elements additionalInfo = document.select("#more-infos .container ul.list-group li ul li");

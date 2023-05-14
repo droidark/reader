@@ -56,23 +56,7 @@ public class VizLector implements Lector {
     }
 
     @Override
-    public List<ItemDTO> getDetails(List<ItemDTO> databaseList) {
-        return getIssues()
-                .stream()
-                .filter(item -> !databaseList.contains(item))
-                .map(this::buildDetails)
-                .toList();
-    }
-
-    @Override
-    public List<ItemDTO> getDetails() {
-        return getIssues()
-                .stream()
-                .map(this::buildDetails)
-                .toList();
-    }
-
-    private ItemDTO buildDetails(ItemDTO item) {
+    public ItemDTO buildDetails(ItemDTO item) {
         try {
             Thread.sleep(5000);
             Document document = Jsoup

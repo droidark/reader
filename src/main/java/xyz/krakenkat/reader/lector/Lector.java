@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public interface Lector {
@@ -44,8 +45,25 @@ public interface Lector {
     boolean isDownload();
     void setDownload(boolean download);
 
-    List<ItemDTO> getDetails();
-    List<ItemDTO> getDetails(List<ItemDTO> databaseList);
+    ItemDTO buildDetails(ItemDTO item);
+
+    default List<ItemDTO> getDetails() {
+        log.info("Getting item details");
+        return getIssues()
+                .stream()
+                .map(this::buildDetails)
+                .sorted(Comparator.comparing(ItemDTO::getNumber))
+                .toList();
+    }
+    default List<ItemDTO> getDetails(List<ItemDTO> databaseList) {
+        log.info("Getting item details");
+        return getIssues()
+                .stream()
+                .filter(item -> !databaseList.contains(item))
+                .map(this::buildDetails)
+                .sorted(Comparator.comparing(ItemDTO::getNumber))
+                .toList();
+    }
 
     default List<ItemDTO> getIssues() {
         int pages = this.getTotalPages();
