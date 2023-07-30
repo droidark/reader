@@ -31,7 +31,7 @@ public class PaniniLectorV2 implements Lector {
     @Override
     public Integer getTotalPages() {
         try {
-            log.info(String.format("Getting total pages from %s%s", ReaderConstants.PANINI_BASE_URL, url));
+            log.info("Getting total pages from {}{}", ReaderConstants.PANINI_BASE_URL, url);
             Document document = Jsoup.connect(ReaderConstants.PANINI_BASE_URL + url).get();
             return document.select("#toolbar-amount").get(0).select(".toolbar-number").size() == 1
                     ? 1
@@ -45,7 +45,7 @@ public class PaniniLectorV2 implements Lector {
     @Override
     public List<ItemDTO> getSinglePage(Integer index) {
         try {
-            log.info(String.format("Reading page %d", index));
+            log.info("Reading page {}", index);
             String page = ReaderConstants.PANINI_BASE_URL + url + "&p=" + index;
             Document document = Jsoup.connect(page).get();
             Elements issues = document.select("ol.product-items li.product-item [id^=product-item-info_]");
@@ -72,7 +72,7 @@ public class PaniniLectorV2 implements Lector {
 
     @Override
     public ItemDTO buildDetails(ItemDTO item) {
-        log.info(String.format("Reading %s", item.getName()));
+        log.info("Reading {}", item.getName());
         try {
             Document document = Jsoup.connect(item.getLink()).get();
             item.setShortDescription(this.getDescription(document));

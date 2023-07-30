@@ -103,7 +103,7 @@ public interface Lector {
         if (!originalFile.exists()) {
             try (InputStream in = new URL(imageParams[4]).openStream()) {
                 Files.copy(in, Paths.get(imagePath));
-                log.info(String.format("The image %s-%s.jpg was saved in the selected folder", imageParams[1], num));
+                log.info("The image {}-{}.jpg was saved in the selected folder", imageParams[1], num);
             } catch (IOException e) {
                 e.printStackTrace();
             }

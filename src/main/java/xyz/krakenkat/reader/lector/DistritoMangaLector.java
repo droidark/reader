@@ -66,7 +66,7 @@ public class DistritoMangaLector implements Lector {
 
     @Override
     public ItemDTO buildDetails(ItemDTO itemDTO) {
-        log.info(String.format("Reading %s", itemDTO.getName()));
+        log.info("Reading {}", itemDTO.getName());
         try {
             Document document = Jsoup.connect(itemDTO.getLink())
                     .userAgent(ReaderConstants.USER_AGENT)
@@ -111,12 +111,10 @@ public class DistritoMangaLector implements Lector {
 
     private String getDate(Document document) {
         String date = document.select("#product-details .product-availability-date span").text();
-        return new StringBuilder()
-                .append(date.substring(6, 10))
-                .append("-")
-                .append(date.substring(3, 5))
-                .append("-")
-                .append(date.substring(0, 2))
-                .toString();
+        return date.substring(6, 10) +
+                "-" +
+                date.substring(3, 5) +
+                "-" +
+                date.substring(0, 2);
     }
 }

@@ -29,7 +29,7 @@ public class WhakoomLector implements Lector {
 
     public Integer getTotalPages() {
         try {
-            log.info(String.format("Getting total pages from %s%s", ReaderConstants.WHAKOOM_BASE_URL, url));
+            log.info("Getting total pages from {}{}", ReaderConstants.WHAKOOM_BASE_URL, url);
             Document document = Jsoup.connect(ReaderConstants.WHAKOOM_BASE_URL + url).get();
             Matcher totalIssues = ReaderConstants.WHAKOOM_TOTAL_ISSUES_PATTERN.matcher(document.select("p.edition-issues").text());
             return totalIssues.find() ? (int) Math.ceil(Double.parseDouble(totalIssues.group(0)) / 48) : 1;
@@ -40,7 +40,7 @@ public class WhakoomLector implements Lector {
 
     public List<ItemDTO> getSinglePage(Integer index) {
         try {
-            log.info(String.format("Reading %s, page %d", key, index));
+            log.info("Reading {}, page {}", key, index);
             String page = "?page=" + index;
             Document doc = Jsoup.connect(ReaderConstants.WHAKOOM_BASE_URL + url + page).get();
             Elements issues = doc.select("ul.v2-cover-list.auto-rows.same-edition li:not(.not-published)");
@@ -66,7 +66,7 @@ public class WhakoomLector implements Lector {
 
     @Override
     public ItemDTO buildDetails(ItemDTO item) {
-        log.info(String.format("Reading %s", item.getName()));
+        log.info("Reading {}", item.getName());
         try {
             Document document = Jsoup.connect(ReaderConstants.WHAKOOM_BASE_URL + item.getLink()).get();
             Element element = document.select(".b-info").get(0);
@@ -95,7 +95,7 @@ public class WhakoomLector implements Lector {
     private Integer getNumber(Element element) {
         String text = element.select(".issue-number").text();
         Matcher matcher = ReaderConstants.WHAKOOM_NUMBER_PATTERN.matcher(text);
-        return matcher.find() ? Integer.valueOf(matcher.group(0).trim()) : 1;
+        return matcher.find() ? Integer.parseInt(matcher.group(0).trim()) : 1;
     }
 
     private String getName(Element element, int number) {
