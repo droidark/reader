@@ -36,7 +36,7 @@ public class KamiteLector implements Lector {
     @Override
     public List<ItemDTO> getSinglePage(Integer index) {
         try {
-            log.info(String.format("Reading page %d", index));
+            log.info("Reading page {}", index);
             Document document = Jsoup.connect(ReaderConstants.KAMITE_BASE_URL + url).get();
             Elements elements = document.select(".product_list .product-container");
             return elements

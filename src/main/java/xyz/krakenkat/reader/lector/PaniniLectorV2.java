@@ -31,13 +31,13 @@ public class PaniniLectorV2 implements Lector {
     @Override
     public Integer getTotalPages() {
         try {
-            log.info(String.format("Getting total pages from %s%s", ReaderConstants.PANINI_BASE_URL, url));
+            log.info("Getting total pages from {}{}", ReaderConstants.PANINI_BASE_URL, url);
             Document document = Jsoup.connect(ReaderConstants.PANINI_BASE_URL + url).get();
             return document.select("#toolbar-amount").get(0).select(".toolbar-number").size() == 1
                     ? 1
                     : (int) Math.ceil(Double.parseDouble(document.select("#toolbar-amount").get(0).select(".toolbar-number").get(2).text()) / 12);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("There was an issue reading the document to calculate the total pages to parse. {}", e.getMessage());
         }
         return 1;
     }
@@ -45,7 +45,7 @@ public class PaniniLectorV2 implements Lector {
     @Override
     public List<ItemDTO> getSinglePage(Integer index) {
         try {
-            log.info(String.format("Reading page %d", index));
+            log.info("Reading page {}", index);
             String page = ReaderConstants.PANINI_BASE_URL + url + "&p=" + index;
             Document document = Jsoup.connect(page).get();
             Elements issues = document.select("ol.product-items li.product-item [id^=product-item-info_]");
@@ -65,23 +65,23 @@ public class PaniniLectorV2 implements Lector {
                             .build())
                     .toList();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("There was an issue reading the document. {}", e.getMessage());
         }
         return List.of();
     }
 
     @Override
-    public ItemDTO buildDetails(ItemDTO item) {
-        log.info(String.format("Reading %s", item.getName()));
+    public ItemDTO buildDetails(ItemDTO itemDTO) {
+        log.info("Reading {}", itemDTO.getName());
         try {
-            Document document = Jsoup.connect(item.getLink()).get();
-            item.setShortDescription(this.getDescription(document));
-            item.setPages(this.getNumberPages(document));
-            item.setCover(getCover());
+            Document document = Jsoup.connect(itemDTO.getLink()).get();
+            itemDTO.setShortDescription(this.getDescription(document));
+            itemDTO.setPages(this.getNumberPages(document));
+            itemDTO.setCover(getCover());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("There was an issue reading the detail document for {}. {}", itemDTO.getName(), e.getMessage());
         }
-        return item;
+        return itemDTO;
     }
 
     private int getNumber(Element element) {
@@ -100,12 +100,12 @@ public class PaniniLectorV2 implements Lector {
 
     private String getDescription(Element element) {
         String description = element.select(".product-info-main .overview").text();
-        return description.equals("") ? "-" : description;
+        return description.isEmpty() ? "-" : description;
     }
 
     private int getNumberPages(Element element) {
         String pages = element.select("#product-attribute-specs-table tbody tr td[data-th='Número de páginas']").text();
-        return pages.equals("")
+        return pages.isEmpty()
                 ? 0
                 : Integer.parseInt(pages.trim());
     }

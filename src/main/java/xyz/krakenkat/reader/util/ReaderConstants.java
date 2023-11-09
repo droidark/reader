@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 public class ReaderConstants {
-    private ReaderConstants() {}
+
     // GENERAL CONSTANTS
     public static final String DEFAULT_EMPTY= "-";
     public static final String DEFAULT_DATE = "0000-00-00";
@@ -65,4 +65,6 @@ public class ReaderConstants {
     public static final String OUTPUT_FORMAT = ".csv";
     public static final String DELIMITER = "|";
     public static final String[] HEADERS = {"NAME", "KEY", "NUMBER", "COVER", "PAGES", "PRINTED_PRICE", "CURRENCY", "RELEASE_DATE", "SHORT_REVIEW", "ISBN10", "EDITION", "VARIANT"};
+
+    private ReaderConstants() {}
 }

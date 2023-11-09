@@ -50,7 +50,7 @@ public class VizLector implements Lector {
                             .build())
                     .toList();
         } catch (Exception e) {
-            log.info(String.format("There was an error processing the page: %s", e.getMessage()));
+            log.info("There was an error processing the page: {}", e.getMessage());
         }
         return List.of();
     }
@@ -72,7 +72,7 @@ public class VizLector implements Lector {
                     document.select(".product-image.mar-x-auto.mar-b-lg.pad-x-md img").attr("src")));
             // document.select(".row.pad-b-xl g-6--lg .type-sm.type-rg--md.line-caption .g-6--md.g-omega--md .mar-b-md:first-child").text()
         } catch (Exception e) {
-            log.info(String.format("There was an error parsing the info for %s: %s", item.getName(), e.getMessage()));
+            log.info("There was an error parsing the info for {}: {}", item.getName(), e.getMessage());
         }
         return item;
     }

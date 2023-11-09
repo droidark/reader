@@ -32,12 +32,12 @@ public class KamiteLectorV2 implements Lector {
     @Override
     public Integer getTotalPages() {
         try {
-            log.info(String.format("Getting total pages from %s%s", ReaderConstants.KAMITE_BASE_URL, url));
+            log.info("Getting total pages from {}{}", ReaderConstants.KAMITE_BASE_URL, url);
             Document document = Jsoup.connect(ReaderConstants.KAMITE_BASE_URL + url).get();
             Matcher matcher = ReaderConstants.KAMITE_V2_PAGE_PATTERN.matcher(document.select(".total-products").text());
             return matcher.find() ? (int) Math.ceil(Double.parseDouble(matcher.group(0)) / 20) : 1;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("There was an issue reading the document to calculate the total pages to parse. {}", e.getMessage());
         }
         return 1;
     }
@@ -45,7 +45,7 @@ public class KamiteLectorV2 implements Lector {
     @Override
     public List<ItemDTO> getSinglePage(Integer index) {
         try {
-            log.info(String.format("Reading page %d", index));
+            log.info("Reading page {}", index);
             Document document = Jsoup.connect(ReaderConstants.KAMITE_BASE_URL + url + "&page=" + index).get();
             Elements elements = document.select("#js-product-list .product_content .item-product article");
             return elements
@@ -55,21 +55,21 @@ public class KamiteLectorV2 implements Lector {
                     .sorted(Comparator.comparing(ItemDTO::getNumber))
                     .toList();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("There was an issue reading the document.");
         }
         return List.of();
     }
 
     @Override
     public ItemDTO buildDetails(ItemDTO itemDTO) {
-        log.info(String.format("Reading %s", itemDTO.getName()));
+        log.info("Reading {}", itemDTO.getName());
         try {
             Document document = Jsoup.connect(itemDTO.getLink())
                     .userAgent(ReaderConstants.USER_AGENT)
                     .get();
             itemDTO.setShortDescription(getDescription(document));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("There was an issue reading the detail document for {}", itemDTO.getName());
         }
         return itemDTO;
     }
@@ -101,7 +101,7 @@ public class KamiteLectorV2 implements Lector {
 
     private Integer getNumber(Element element) {
         Matcher matcher = ReaderConstants.KAMITE_NUMBER_PATTERN.matcher(element.select(".product_desc h3[itemprop='name'] a").attr("title"));
-        return matcher.find() ? Integer.valueOf(matcher.group(0).trim()) : 1;
+        return matcher.find() ? Integer.parseInt(matcher.group(0).trim()) : 1;
     }
 
     private String getDescription(Document document) {
@@ -110,12 +110,12 @@ public class KamiteLectorV2 implements Lector {
 
     private Integer getPageNumbers(Element element) {
         Matcher matcher = ReaderConstants.KAMITE_PAGE_NUMBER_PATTERN.matcher(element.select(".product_desc .product-desc p:nth-child(4)").text());
-        return matcher.find() ? Integer.valueOf(matcher.group(0).trim()) : 1;
+        return matcher.find() ? Integer.parseInt(matcher.group(0).trim()) : 1;
     }
 
     private Double getPrice(Element element) {
         String text = element.select(".product-price-and-shipping span[itemprop='price']").text();
         Matcher matcher = ReaderConstants.KAMITE_V2_PRICE_PATTERN.matcher(text);
-        return  matcher.find() ? Double.valueOf(matcher.group(0)) : 0.00;
+        return  matcher.find() ? Double.parseDouble(matcher.group(0)) : 0.00;
     }
 }

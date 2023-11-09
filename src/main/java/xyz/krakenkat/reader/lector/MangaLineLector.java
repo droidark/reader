@@ -42,7 +42,7 @@ public class MangaLineLector implements Lector {
                     .map(this::buildItem)
                     .toList();
         } catch (Exception e) {
-            log.info(String.format("There was an error processing the page: %s", e.getMessage()));
+            log.info("There was an error processing the page: {}", e.getMessage());
         }
         return List.of();
     }
@@ -65,25 +65,25 @@ public class MangaLineLector implements Lector {
 
     @Override
     public ItemDTO buildDetails(ItemDTO itemDTO) {
-        log.info(String.format("Reading %s", itemDTO.getName()));
+        log.info("Reading {}", itemDTO.getName());
         try {
             Document document = Jsoup.connect(itemDTO.getLink())
                     .get();
             itemDTO.setShortDescription(document.select("div[itemprop='description'] p").text());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("There was an issue reading the detail document for {}", itemDTO.getName());
         }
         return itemDTO;
     }
 
     private Integer getNumber(Element element) {
         Matcher matcher = ReaderConstants.MANGALINE_NUMBER_PATTERN.matcher(element.select(".products-entry .products-content .contents h3.product-title a").text());
-        return matcher.find() ? Integer.valueOf(matcher.group(0).trim()) : 1;
+        return matcher.find() ? Integer.parseInt(matcher.group(0).trim()) : 1;
     }
 
     private Double getPrice(Element element) {
         String text = element.select(".products-entry .products-content .contents span.price span.woocommerce-Price-amount bdi").text();
         Matcher matcher = ReaderConstants.MANGALINE_PRICE_PATTERN.matcher(text);
-        return  matcher.find() ? Double.valueOf(matcher.group(0)) : 0.00;
+        return  matcher.find() ? Double.parseDouble(matcher.group(0)) : 0.00;
     }
 }

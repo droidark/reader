@@ -44,7 +44,7 @@ public class DistritoMangaLector implements Lector {
                     .map(this::buildItem)
                     .toList();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("There was an issue reading the document.");
         }
         return List.of();
     }
@@ -66,7 +66,7 @@ public class DistritoMangaLector implements Lector {
 
     @Override
     public ItemDTO buildDetails(ItemDTO itemDTO) {
-        log.info(String.format("Reading %s", itemDTO.getName()));
+        log.info("Reading {}", itemDTO.getName());
         try {
             Document document = Jsoup.connect(itemDTO.getLink())
                     .userAgent(ReaderConstants.USER_AGENT)
@@ -75,7 +75,7 @@ public class DistritoMangaLector implements Lector {
             itemDTO.setPages(getPageNumbers(document));
             itemDTO.setDate(getDate(document));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("There was an issue reading the detail document for {}", itemDTO.getName());
         }
         return itemDTO;
     }
@@ -106,17 +106,15 @@ public class DistritoMangaLector implements Lector {
     }
 
     private Integer getPageNumbers(Document document) {
-        return Integer.parseInt((document.select("#product-details .product-features.d-none.d-lg-block dl.caracteristicas-prod.data-sheet dd:nth-child(4)").text()));
+        return Integer.parseInt((document.select("#product-details section.product-features.d-none.d-lg-block dl.caracteristicas-prod.data-sheet dd:nth-child(4)").text()));
     }
 
     private String getDate(Document document) {
-        String date = document.select("#product-details .product-availability-date span").text();
-        return new StringBuilder()
-                .append(date.substring(6, 10))
-                .append("-")
-                .append(date.substring(3, 5))
-                .append("-")
-                .append(date.substring(0, 2))
-                .toString();
+        String date = document.select("#product-details section.product-features.d-none.d-lg-block dl.caracteristicas-prod.data-sheet dd:nth-child(16)").text();
+        return date.substring(6, 10) +
+                "-" +
+                date.substring(3, 5) +
+                "-" +
+                date.substring(0, 2);
     }
 }
