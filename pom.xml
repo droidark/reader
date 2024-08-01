@@ -10,12 +10,12 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <jsoup.version>1.16.2</jsoup.version>
-        <common-csv.version>1.10.0</common-csv.version>
-        <slf4j.version>2.0.9</slf4j.version>
-        <lombok.version>1.18.30</lombok.version>
+        <maven.compiler.source>22</maven.compiler.source>
+        <maven.compiler.target>22</maven.compiler.target>
+        <jsoup.version>1.18.1</jsoup.version>
+        <common-csv.version>1.11.0</common-csv.version>
+        <slf4j.version>2.0.13</slf4j.version>
+        <lombok.version>1.18.34</lombok.version>
     </properties>
 
     <dependencies>

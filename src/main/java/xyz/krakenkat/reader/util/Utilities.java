@@ -5,6 +5,8 @@ import xyz.krakenkat.reader.dto.ItemDTO;
 import java.util.List;
 import java.util.Objects;
 
+import static xyz.krakenkat.reader.util.ReaderConstants.*;
+
 public class Utilities {
     private Utilities() {
     }
@@ -19,18 +21,18 @@ public class Utilities {
             if (item != null) {
                 itemDTO.setPages(item.getPages());
                 itemDTO.setPrice(item.getPrice());
-                if (itemDTO.getIsbn().equals(ReaderConstants.DEFAULT_ISBN) && !item.getIsbn().equals(ReaderConstants.DEFAULT_ISBN)) {
+                if (itemDTO.getIsbn().equals(DEFAULT_ISBN) && !item.getIsbn().equals(DEFAULT_ISBN)) {
                     itemDTO.setIsbn(item.getIsbn());
                 }
                 if ((itemDTO.getShortDescription().equals("-") || itemDTO.getShortDescription().isEmpty()) && !item.getShortDescription().equals("-")) {
                     itemDTO.setShortDescription(item.getShortDescription());
                 }
-                if (itemDTO.getDate().isEmpty() && (!item.getDate().isEmpty() && item.getDate() != null)) {
+                if (itemDTO.getDate().isEmpty() && !item.getDate().isEmpty()) {
                     itemDTO.setDate(item.getDate());
                 }
             } else {
-                itemDTO.setPages(ReaderConstants.DEFAULT_PAGES);
-                itemDTO.setPrice(ReaderConstants.DEFAULT_PRICE);
+                itemDTO.setPages(DEFAULT_PAGES);
+                itemDTO.setPrice(DEFAULT_PRICE);
             }
         }).toList();
     }

@@ -11,7 +11,7 @@ public class ReaderConstants {
     public static final String DEFAULT_ISBN = "000-0-00-000000-0";
     public static final String MXN_CURRENCY = "MXN";
     public static final String USD_CURRENCY = "USD";
-    public static final double DEFAULT_PRICE = 139.0;
+    public static final double DEFAULT_PRICE = 189.0;
     public static final int DEFAULT_PAGES = 192;
     public static final int DEFAULT_EDITION = 1;
     public static final String USER_AGENT = "Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6";
