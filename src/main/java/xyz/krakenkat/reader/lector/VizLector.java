@@ -41,6 +41,7 @@ public class VizLector implements Lector {
                     .stream()
                     .map(issue -> ItemDTO
                             .builder()
+                            .titleId(titleId)
                             .link(issue.select("figure a.product-thumb").attr("href"))
                             .name(issue.select(".pad-x-md a.color-off-black.hover-red").text())
                             .number(this.getNumber(issue))

@@ -34,7 +34,6 @@ public class DistritoMangaLector implements Lector {
     @Override
     public List<ItemDTO> getSinglePage(Integer index) {
         try {
-            log.info("Reading page {}", index);
             Document document = Jsoup.connect(ReaderConstants.DISTRITO_MANGA_BASE_URL + url)
                     .userAgent(ReaderConstants.USER_AGENT)
                     .get();
@@ -44,7 +43,7 @@ public class DistritoMangaLector implements Lector {
                     .map(this::buildItem)
                     .toList();
         } catch (Exception e) {
-            log.info("There was an issue reading the document.");
+            log.info("There was an issue reading the document. {}", e.getMessage());
         }
         return List.of();
     }
@@ -68,6 +67,7 @@ public class DistritoMangaLector implements Lector {
     public ItemDTO buildDetails(ItemDTO itemDTO) {
         log.info("Reading {}", itemDTO.getName());
         try {
+            Thread.sleep(5000);
             Document document = Jsoup.connect(itemDTO.getLink())
                     .userAgent(ReaderConstants.USER_AGENT)
                     .get();
@@ -81,15 +81,15 @@ public class DistritoMangaLector implements Lector {
     }
 
     private String getName(Element element) {
-        return element.select("h3.h3.product-title a").text();
+        return element.select("p.h3.product-title.productTitle a span").text();
     }
 
     private String getLink(Element element) {
-        return element.select("h3.h3.product-title a").attr("href");
+        return element.select("p.h3.product-title.productTitle a").attr("href");
     }
 
     private Integer getNumber(Element element) {
-        Matcher matcher = ReaderConstants.DISTRITO_MANGA_NUMBER_PATTERN.matcher(element.select("h3.h3.product-title a").text());
+        Matcher matcher = ReaderConstants.DISTRITO_MANGA_NUMBER_PATTERN.matcher(element.select("p.h3.product-title.productTitle a").text());
         return matcher.find() ? Integer.parseInt(matcher.group(0).trim()) : 1;
     }
 
@@ -98,7 +98,7 @@ public class DistritoMangaLector implements Lector {
     }
 
     private Double getPrice(Element element) {
-        return Double.valueOf(element.select(".col-12.p-0.mt-2.ml-1 .product-price-and-shipping a span.product-price").attr("content"));
+        return Double.parseDouble(element.select(".product-price.col-3").attr("content"));
     }
 
     private String getShortDescription(Document document) {
@@ -106,11 +106,11 @@ public class DistritoMangaLector implements Lector {
     }
 
     private Integer getPageNumbers(Document document) {
-        return Integer.parseInt((document.select("#product-details section.product-features.d-none.d-lg-block dl.caracteristicas-prod.data-sheet dd:nth-child(4)").text()));
+        return Integer.parseInt((document.select("#product-details section.product-features.d-block.d-lg-block dl.caracteristicas-prod.data-sheet dd:nth-child(4)").text()));
     }
 
     private String getDate(Document document) {
-        String date = document.select("#product-details section.product-features.d-none.d-lg-block dl.caracteristicas-prod.data-sheet dd:nth-child(16)").text();
+        String date = document.select("#product-details section.product-features.d-block.d-lg-block dl.caracteristicas-prod.data-sheet dd:nth-child(14)").text();
         return date.substring(6, 10) +
                 "-" +
                 date.substring(3, 5) +

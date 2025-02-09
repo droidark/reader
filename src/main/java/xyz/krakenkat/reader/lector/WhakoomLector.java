@@ -79,7 +79,7 @@ public class WhakoomLector implements Lector {
                     : ReaderConstants.DEFAULT_EMPTY);
             Elements elems = document.select(".info .content .info-item");
 
-            item.setDate(!elems.isEmpty() && !elems.get(0).select("p").attr("content").equals("")
+            item.setDate(!elems.isEmpty() && !elems.get(0).select("p").attr("content").isEmpty()
                     ? elems.get(0).select("p").attr("content")
                     : ReaderConstants.DEFAULT_DATE);
 
@@ -87,7 +87,7 @@ public class WhakoomLector implements Lector {
                     ? elems.get(1).select("ul li").text()
                     : ReaderConstants.DEFAULT_ISBN);
         } catch (Exception e) {
-            log.error(String.format("An issue happened at the moment to read the HTML document %s", e.getMessage()));
+            log.error("An issue happened at the moment to read the HTML document {}", e.getMessage());
         }
         return item;
     }

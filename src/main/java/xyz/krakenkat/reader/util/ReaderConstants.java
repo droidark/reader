@@ -11,7 +11,8 @@ public class ReaderConstants {
     public static final String DEFAULT_ISBN = "000-0-00-000000-0";
     public static final String MXN_CURRENCY = "MXN";
     public static final String USD_CURRENCY = "USD";
-    public static final double DEFAULT_PRICE = 189.0;
+    public static final double DEFAULT_PRICE = 179.0;
+    public static final double DEFAULT_US_DIGITAL_PRICE = 6.99;
     public static final int DEFAULT_PAGES = 192;
     public static final int DEFAULT_EDITION = 1;
     public static final String USER_AGENT = "Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6";
@@ -61,10 +62,19 @@ public class ReaderConstants {
     public static final Pattern MANGALINE_NUMBER_PATTERN = Pattern.compile("\\d{1,3}$");
     public static final Pattern MANGALINE_PRICE_PATTERN = Pattern.compile("\\d{1,3}\\.\\d{2}");
 
+    // KODANSHA US
+    public static final String KODANSHA_BASE_URL = "https://kodansha.us";
+    public static final Pattern KODANSHA_NUMBER_PATTERN = Pattern.compile("\\d{1,3}$");
+    public static final Pattern KODANSHA_PAGES_PATTERN = Pattern.compile("\\d{2,4}");
+    public static final Pattern KODANSHA_PRICE_PATTERN = Pattern.compile("\\d{1,2}\\.\\d{2}");
+    public static final Pattern KODANSHA_IMAGE_PATTERN = Pattern.compile("^https?:/\\/\\S+\\.jpg");
+    public static final String KODANSHA_ISBN_PATTERN = "\\d{13}";
+
     // WRITER
     public static final String OUTPUT_FORMAT = ".csv";
     public static final String DELIMITER = "|";
-    public static final String[] HEADERS = {"NAME", "KEY", "NUMBER", "COVER", "PAGES", "PRINTED_PRICE", "CURRENCY", "RELEASE_DATE", "SHORT_REVIEW", "ISBN10", "EDITION", "VARIANT"};
+    //public static final String[] HEADERS = {"TITLE_ID","NAME", "KEY", "NUMBER", "COVER", "PAGES", "PRINTED_PRICE", "DIGITAL_PRICE", "CURRENCY", "RELEASE_DATE", "SHORT_REVIEW", "ISBN", "EDITION", "VARIANT"};
+    public static final String[] HEADERS = {"TITLE_ID","NAME", "KEY", "NUMBER", "COVER", "PAGES", "PRINTED_PRICE", "CURRENCY", "RELEASE_DATE", "SHORT_REVIEW", "ISBN10", "EDITION", "VARIANT"};
 
     private ReaderConstants() {}
 }
