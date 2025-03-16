@@ -73,7 +73,6 @@ public class ReaderConstants {
     // WRITER
     public static final String OUTPUT_FORMAT = ".csv";
     public static final String DELIMITER = "|";
-    //public static final String[] HEADERS = {"TITLE_ID","NAME", "KEY", "NUMBER", "COVER", "PAGES", "PRINTED_PRICE", "DIGITAL_PRICE", "CURRENCY", "RELEASE_DATE", "SHORT_REVIEW", "ISBN", "EDITION", "VARIANT"};
     public static final String[] HEADERS = {"TITLE_ID","NAME", "KEY", "NUMBER", "COVER", "PAGES", "PRINTED_PRICE", "CURRENCY", "RELEASE_DATE", "SHORT_REVIEW", "ISBN10", "EDITION", "VARIANT"};
 
     private ReaderConstants() {}
