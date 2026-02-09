@@ -5,15 +5,11 @@ import org.slf4j.LoggerFactory;
 import xyz.krakenkat.reader.dto.ItemDTO;
 import xyz.krakenkat.reader.util.ReaderConstants;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import static xyz.krakenkat.reader.util.Utilities.saveCover;
 
 public interface Lector {
     Logger log = LoggerFactory.getLogger(Lector.class);
@@ -30,10 +26,6 @@ public interface Lector {
 
     void setTitleId(String titleId);
 
-    Integer getTotalPages();
-
-    List<ItemDTO> getSinglePage(Integer index);
-
     String getPath();
 
     void setPath(String path);
@@ -43,7 +35,12 @@ public interface Lector {
     void setFolder(String folder);
 
     boolean isDownload();
+
     void setDownload(boolean download);
+
+    Integer getTotalPages();
+
+    List<ItemDTO> getSinglePage(Integer index);
 
     ItemDTO buildDetails(ItemDTO item);
 
@@ -55,8 +52,9 @@ public interface Lector {
                 .sorted(Comparator.comparing(ItemDTO::getNumber))
                 .toList();
     }
+
     default List<ItemDTO> getDetails(List<ItemDTO> databaseList) {
-        log.info("Getting item details");
+        log.info("Getting item details to compare with the database list");
         return getIssues()
                 .stream()
                 .filter(item -> !databaseList.contains(item))
@@ -74,45 +72,8 @@ public interface Lector {
         return items;
     }
 
-    /*
-    * [
-    *   0: number
-    *   1: key
-    *   2: path: 'path to save image'      -> /d/Documents/imageCollector/
-    *   3: folder: 'publisher-folder-name' -> panini-manga-mx
-    *   4: url: where-is-located-the-image -> https://...
-    * ]
-    * */
-    default String saveCover(String... imageParams) {
-        String num = imageParams[0].length() == 1 ? "0" + imageParams[0] : imageParams[0];
-        String imagePath = imageParams[2]
-                + imageParams[3]
-                + File.separator
-                + imageParams[1]
-                + File.separator
-                + imageParams[1]
-                + ReaderConstants.DEFAULT_EMPTY
-                + num
-                + ".jpg";
-
-        File directory = new File(imageParams[2] + imageParams[3] + File.separator + imageParams[1]);
-        if (!directory.exists())
-            directory.mkdir();
-
-        File originalFile = new File(imagePath);
-        if (!originalFile.exists()) {
-            try (InputStream in = new URL(imageParams[4]).openStream()) {
-                Files.copy(in, Paths.get(imagePath));
-                log.info("The image {}-{}.jpg was saved in the selected folder", imageParams[1], num);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return "/" + imageParams[3] + "/" + imageParams[1] + "/" + imageParams[1] + "-" + num + ".jpg";
-    }
-
-    default String getCover(String... params) {
-        return isDownload() ? this.saveCover(params) : ReaderConstants.DEFAULT_EMPTY;
+    default String getCover(int number, String key, String path, String folder, String url) {
+        return isDownload() ? saveCover(number, key, path, folder, url) : ReaderConstants.DEFAULT_EMPTY;
     }
 
     default String getCover() { return ReaderConstants.DEFAULT_EMPTY; }

@@ -17,6 +17,7 @@ public class ItemDTO {
     private Integer number;
     private Integer pages;
     private Double price;
+    private Double digitalPrice;
     private String cover;
     private String shortDescription;
     private Integer edition;

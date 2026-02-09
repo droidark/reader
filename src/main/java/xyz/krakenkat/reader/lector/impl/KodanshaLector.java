@@ -1,4 +1,4 @@
-package xyz.krakenkat.reader.lector;
+package xyz.krakenkat.reader.lector.impl;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -7,7 +7,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import xyz.krakenkat.reader.dto.ItemDTO;
+import xyz.krakenkat.reader.lector.Lector;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -44,26 +46,12 @@ public class KodanshaLector implements Lector {
             String page = KODANSHA_BASE_URL + url;
             Document document = Jsoup.connect(page).get();
             Elements issues = document.select(".series-desktop-volume-grid .series-volumeItem");
-            String prefix = document.select("h1.series-desktop-header-info-title").text().trim();
 
             return issues
                     .stream()
-                    .map(issue -> ItemDTO
-                            .builder()
-                            .titleId(titleId)
-                            .name(this.getName(prefix, issue))
-                            .link(this.getLink(issue))
-                            .number(this.getNumber(issue))
-                            .price(this.getPrice(issue))
-                            .cover(getCover(this.getNumber(issue).toString(), key, path, folder, this.getCoverUrl(issue)))
-                            .pages(this.getPages(issue))
-                            .edition(DEFAULT_EDITION)
-                            .variant(Boolean.FALSE)
-                            .date(this.getDate(issue))
-                            .currency(USD_CURRENCY)
-                            .build())
+                    .map(this::buildItem)
                     .toList();
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.info("There was an error processing the page: {}", e.getMessage());
         }
         return List.of();
@@ -74,43 +62,65 @@ public class KodanshaLector implements Lector {
         try {
             String page = KODANSHA_BASE_URL + item.getLink();
             Document document = Jsoup.connect(page).get();
-            item.setShortDescription(this.getShortDescription(document));
-            item.setIsbn(this.getISBN(document));
-        } catch (Exception e) {
+
+            item.setName(buildName(document));
+            item.setShortDescription(buildShortDescription(document));
+            item.setIsbn(buildISBN(document));
+        } catch (IOException e) {
             log.info("There was an error parsing the info for {}: {}", item.getName(), e.getMessage());
         }
         return item;
     }
 
-    private String getName(String prefix, Element element) {
-        String selector = ".series-volume-item-top-container.series-volume-item-top-container-desktop .series-volume-item-container.series-volume-item-container-normal .product-item-column-wrapper .product-item-wrapper a h3.product-name";
-        return prefix + ", " + element.select(selector).text().trim();
+    private ItemDTO buildItem(Element element) {
+        return ItemDTO
+                .builder()
+                .titleId(titleId)
+                .link(buildLink(element))
+                .number(buildNumber(element))
+                .price(buildPrice(element))
+                .digitalPrice(buildPrice(element))
+                .cover(buildCover(element, buildNumber(element), key, path, folder, download))
+                .pages(buildPages(element))
+                .edition(DEFAULT_EDITION)
+                .variant(Boolean.FALSE)
+                .date(buildDate(element))
+                .currency(USD_CURRENCY)
+                .build();
     }
 
-    private String getLink(Element element) {
+    private String buildName(Element element) {
+        return element.select("h1.product-title").text().trim();
+    }
+
+    private String buildLink(Element element) {
         String selector = ".series-volume-item-top-container.series-volume-item-top-container-desktop .series-volume-item-container.series-volume-item-container-normal .product-item-column-wrapper .product-item-wrapper a";
         return element.select(selector).attr("href").trim();
     }
 
-    private Integer getNumber(Element element) {
+    private Integer buildNumber(Element element) {
         String selector = ".series-volume-item-top-container.series-volume-item-top-container-desktop .series-volume-item-container.series-volume-item-container-normal .product-item-column-wrapper .product-item-wrapper a h3.product-name";
         String text = element.select(selector).text();
         Matcher matcher = KODANSHA_NUMBER_PATTERN.matcher(text);
         return matcher.find() ? Integer.parseInt(matcher.group(0).trim()) : 1;
     }
 
-    private Integer getPages(Element element) {
+    private Integer buildPages(Element element) {
         String selector = ".series-volume-item-top-container.series-volume-item-top-container-desktop .series-volume-item-container.series-volume-item-container-normal .product-item-column-wrapper .product-item-wrapper .info-wrapper .date-price-wrapper .date-pages > span:last-of-type";
         String text = element.select(selector).text();
         Matcher matcher = KODANSHA_PAGES_PATTERN.matcher(text);
         return matcher.find() ? Integer.parseInt(matcher.group(0).trim()) : 1;
     }
 
-    private Double getPrice(Element element) {
+    private Double buildPrice(Element element) {
         String selector = ".series-volume-item-top-container.series-volume-item-top-container-desktop .series-volume-item-container.series-volume-item-container-normal .product-item-column-wrapper .product-item-wrapper .info-wrapper .price-grid-desktop .price-grid .price-grid-item .prices-wrapper .price";
         String text = element.select(selector).text().trim();
         Matcher matcher = KODANSHA_PRICE_PATTERN.matcher(text);
         return matcher.find() ? Double.parseDouble(matcher.group(0)) : 0.00;
+    }
+
+    private String buildCover(Element element, int number, String key, String path, String folder, boolean download) {
+        return download ? this.getCover(number, key, path, folder, getCoverUrl(element)) : DEFAULT_EMPTY;
     }
 
     private String getCoverUrl(Element element) {
@@ -120,7 +130,7 @@ public class KodanshaLector implements Lector {
         return matcher.find() ? matcher.group(0) : "no-url-found";
     }
 
-    private String getDate(Element element) {
+    private String buildDate(Element element) {
         DateTimeFormatter[] inputFormatters = {
                 DateTimeFormatter.ofPattern("MMM. d, yyyy"),
                 DateTimeFormatter.ofPattern("MMM dd, yyyy")
@@ -145,12 +155,12 @@ public class KodanshaLector implements Lector {
                 .orElse(DEFAULT_DATE);
     }
 
-    private String getShortDescription(Document document) {
+    private String buildShortDescription(Document document) {
         String selector = "p.series-desktop-header-info-description";
         return document.select(selector).text().trim();
     }
 
-    private String getISBN(Document document) {
+    private String buildISBN(Document document) {
         String selector = ".product-desktop-rating-wrapper .product-desktop-rating-table-container .product-desktop-rating-table-second-row-wrapper .product-desktop-rating-table-second-row-inner-wrapper .product-desktop-rating-table-title-value-wrapper:nth-of-type(3) .product-desktop-rating-table-value-wrapper";
         String isbn = document.select(selector).text().trim();
         if (isbn.length() != 13 || !isbn.matches(KODANSHA_ISBN_PATTERN)) {

@@ -10,12 +10,14 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>22</maven.compiler.source>
-        <maven.compiler.target>22</maven.compiler.target>
-        <jsoup.version>1.18.1</jsoup.version>
-        <common-csv.version>1.11.0</common-csv.version>
-        <slf4j.version>2.0.13</slf4j.version>
-        <lombok.version>1.18.34</lombok.version>
+        <maven.compiler.source>23</maven.compiler.source>
+        <maven.compiler.target>23</maven.compiler.target>
+        <jsoup.version>1.20.1</jsoup.version>
+        <common-csv.version>1.14.0</common-csv.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <lombok.version>1.18.38</lombok.version>
+        <junit-jupiter-api.version>5.12.2</junit-jupiter-api.version>
+        <mockito-junit-jupiter.version>5.17.0</mockito-junit-jupiter.version>
     </properties>
 
     <dependencies>
@@ -49,16 +51,15 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.10.1</version>
+            <version>${junit-jupiter-api.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.7.0</version>
+            <version>${mockito-junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -66,7 +67,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.7.1</version>
                 <configuration>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
